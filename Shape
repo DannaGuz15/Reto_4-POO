@@ -1,0 +1,138 @@
+import math
+
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def compute_distance(self, other_point):
+        return math.sqrt((self.x - other_point.x)**2 + (self.y - other_point.y)**2)
+
+class Line:
+    def __init__(self, start_point, end_point):
+        self.start_point = start_point
+        self.end_point = end_point
+        self.length = start_point.compute_distance(end_point)
+
+
+class Shape:
+    def __init__(self):
+        self.vertices = []
+        self.edges = []
+        self.inner_angles = []
+        self.is_regular = False
+
+
+    def add_vertex(self, vertex):
+        self.vertices.append(vertex)
+
+    def add_edge(self, edge):
+        self.edges.append(edge)
+
+    def compute_area(self):
+        pass
+
+    def compute_perimeter(self):
+        pass
+
+    def compute_inner_angles(self):
+        pass
+
+
+class Triangle(Shape):
+    def __init__(self, vertex1, vertex2, vertex3):
+        super().__init__()
+        self.vertices = [vertex1, vertex2, vertex3]
+        self.edges = [Line(vertex1, vertex2), Line(vertex2, vertex3), Line(vertex3, vertex1)]
+        self.compute_inner_angles()
+
+    def compute_inner_angles(self):
+        a = self.edges[0].length
+        b = self.edges[1].length
+        c = self.edges[2].length
+        self.inner_angles = [
+            math.degrees(math.acos((b**2 + c**2 - a**2) / (2 * b * c))),
+            math.degrees(math.acos((c**2 + a**2 - b**2) / (2 * c * a))),
+            math.degrees(math.acos((a**2 + b**2 - c**2) / (2 * a * b)))
+        ]
+    def compute_area(self):
+        # Usar la fórmula de Herón para calcular el área
+        s = sum(self.edges[i].length for i in range(3)) / 2
+        return math.sqrt(s * (s - self.edges[0].length) * (s - self.edges[1].length) * (s - self.edges[2].length))
+
+    def compute_perimeter(self):
+        # Sumar la longitud de los tres lados
+        return sum(self.edges[i].length for i in range(3))
+
+class Isosceles(Triangle):
+    def __init__(self, base, leg):
+        height = math.sqrt(leg**2 - (base/2)**2)
+        vertex1 = Point(0, 0)
+        vertex2 = Point(base, 0)
+        vertex3 = Point(base/2, height)
+        super().__init__(vertex1, vertex2, vertex3)
+
+class Equilateral(Triangle):
+    def __init__(self, side):
+        height = side * math.sqrt(3) / 2
+        vertex1 = Point(0, 0)
+        vertex2 = Point(side, 0)
+        vertex3 = Point(side / 2, height)
+        super().__init__(vertex1, vertex2, vertex3)
+
+class Scalene(Triangle):
+    def __init__(self, side1, side2, side3):
+        vertex1 = Point(0, 0)
+        vertex2 = Point(side1, 0)
+        height = math.sqrt(side2**2 - ((side1**2 - side3**2 + side2**2) / (2 * side1))**2)
+        vertex3 = Point((side1**2 - side3**2 + side2**2) / (2 * side1), height)
+        super().__init__(vertex1, vertex2, vertex3)
+
+class TriRectangle(Triangle):
+    def __init__(self, base, height):
+        vertex1 = Point(0, 0)
+        vertex2 = Point(base, 0)
+        vertex3 = Point(0, height)
+        super().__init__(vertex1, vertex2, vertex3)
+
+class Rectangle(Shape):
+    def __init__(self, width, height):
+        super().__init__()
+        self.vertices = [Point(0, 0), Point(width, 0), Point(width, height), Point(0, height)]
+        self.edges = [Line(self.vertices[i], self.vertices[(i + 1) % 4]) for i in range(4)]
+
+    def compute_area(self):
+        return self.vertices[1].x * self.vertices[3].y
+
+    def compute_perimeter(self):
+        return 2 * (self.vertices[1].x + self.vertices[3].y)
+
+class Square(Rectangle):
+    def __init__(self, side_length):
+        super().__init__(side_length, side_length)
+
+equilateral_triangle = Equilateral(5)
+
+# Crear un triángulo isósceles
+isosceles_triangle = Isosceles(6, 5)
+
+# Crear un triángulo escaleno
+scalene_triangle = Scalene(7, 5, 6)
+
+# Crear un rectángulo
+rectangle = Rectangle(4, 6)
+
+# Crear un cuadrado
+square = Square(4)
+
+# Imprimir resultados
+print("Área del triángulo equilátero:", equilateral_triangle.compute_area())
+print("Perímetro del triángulo equilátero:", equilateral_triangle.compute_perimeter())
+print("Área del triángulo isósceles:", isosceles_triangle.compute_area())
+print("Perímetro del triángulo isósceles:", isosceles_triangle.compute_perimeter())
+print("Área del triángulo escaleno:", scalene_triangle.compute_area())
+print("Perímetro del triángulo escaleno:", scalene_triangle.compute_perimeter())
+print("Área del rectángulo:", rectangle.compute_area())
+print("Perímetro del rectángulo:", rectangle.compute_perimeter())
+print("Área del cuadrado:", square.compute_area())
+print("Perímetro del cuadrado:", square.compute_perimeter())
